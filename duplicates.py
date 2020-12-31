@@ -8,34 +8,44 @@ except:
 import hashlib,io,os,signal,sys
 from imohash import hashfile
 
+#define default target here
 root='C:\\Users\\Timothy'
 if __name__=='__main__':
    tobe=sys.argv
-   tobe.pop(0)
+   tobe.pop(0) #remove self path arg
    print(len(sys.argv))
+   
    if len(sys.argv) > 0:
       root=os.path.join(' '.join(tobe))
-   del(tobe)
-   root=os.path.abspath(root)
+      #concatenate all arguments into one path
+   del(tobe) #free up space
+   
+   root=os.path.abspath(root) #set target's path to be absolute path
    print(root)
 #---------------SIGSTOP handler---------------
 
+#SAVE FUNCTION
 def DUMPEVERYFUCKINGTHING(secondpass=False):
    total=0
-   old = files.duplicates[0]
+   old = files.duplicates[0] #get first in list
    for x in files.duplicates:
+      #if old is not x and md5s are different
       if old!=x and old.md5 ==x.md5:
-         try: total += os.stat(x.name).st_size
+         try: total += os.stat(x.name).st_size #add to size tally
          except: pass
       if old.md5 != x.md5:
          old=x
-   #i=input('write to log? ')
+         #if we are in a new block of duplicate files, set the first found to be the first in the sequence
+
+   #if this is the first pass, then the filelist
+   #was generated using the imosum 
    logfile=root+os.sep+'duplicatefiles.txt'
    pyobjectlogfile=os.path.abspath(os.path.join(root,'duplicatefilespyPickleObject'))
    if not secondpass:
       logfile=os.path.abspath(os.path.join(root,'duplicatefiles-inaccurate.txt'))
       pyobjectlogfile=root+os.sep+'duplicatefilespyPickleObject-inaccurate'
-      
+   
+   #io is imported to deal with the sometimes weirder special chars
    with io.open(logfile,'w', encoding="utf-8") as f:
        f.write(str(files)+str(len(files.duplicates))+' files listed.\n'+str(round(total/(1024*1024),3))+' mb listed')
    print('wrote to',logfile)
