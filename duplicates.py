@@ -1,5 +1,8 @@
 #file name => duplicates.py
 
+#excluded dirs are stored in file "DuplicatesExcludedDirs.txt"
+
+excludedDirListFile="DuplicatesExcludedDirs.txt"
 
 try:
    import cPickle as pickle
@@ -7,6 +10,15 @@ except:
    import pickle
 import hashlib,io,os,signal,sys
 from imohash import hashfile
+
+excludedDirListFile=os.path.abspath(excludedDirListFile)
+excludedDirList=[]
+try: excludedDirList=open(excludedDirListFile,'r').read()
+except: print('some error loading',excludedDirListFile,'perhaps it is non existant?')
+excludedDirList=excludedDirList.split('\n')
+
+print('Excluded dir list:\n[',excludedDirList,']')
+input('paused.')
 
 #define default target here
 root='C:\\Users\\Timothy'
@@ -22,6 +34,14 @@ if __name__=='__main__':
    
    root=os.path.abspath(root) #set target's path to be absolute path
    print(root)
+
+#--------------Checks if x is a rootdir of any in the excludeddirlist--------
+def IsInExcludedDirList(arg):
+   for excludedDir in excludedDirList:
+      if excludedDir in arg:
+         return True
+   return False
+
 #---------------SIGSTOP handler---------------
 
 #SAVE FUNCTION
@@ -84,6 +104,9 @@ class FileList:
         debug=False
         if root==None: root=self.root
         for i in os.walk(root):
+            if IsInExcludedDirList(i[0]):
+               #print(i[0],'is in excluded dir list. Skipping this dir...')
+               continue
             for file in i[2]:
                 if time()-t > self.debugprintinterval:
                    debug=True
